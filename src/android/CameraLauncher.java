@@ -41,6 +41,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import androidx.core.content.FileProvider;
+import androidx.camera.core.ImageCapture;
 import android.util.Base64;
 import android.system.Os;
 import android.system.OsConstants;
@@ -113,6 +114,10 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 
     private static final String TIME_FORMAT = "yyyyMMdd_HHmmss";
 
+    private static final int FLASH_AUTO = 0;
+    private static final int FLASH_ON = 1;
+    private static final int FLASH_OFF = -1;
+
     private int mQuality;                   // Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
     private int targetWidth;                // desired width of the image
     private int targetHeight;               // desired height of the image
@@ -125,6 +130,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     private boolean correctOrientation;     // Should the pictures orientation be corrected
     private boolean orientationCorrected;   // Has the picture's orientation been corrected
     private boolean allowEdit;              // Should we allow the user to crop the image.
+    private int flashMode;                  // Flash auto: 0, on: 1, off: -1
 
     public CallbackContext callbackContext;
 
@@ -159,6 +165,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             this.encodingType = JPEG;
             this.mediaType = PICTURE;
             this.mQuality = 50;
+            this.flashMode = FLASH_AUTO;
 
             //Take the values from the arguments if they're not already defined (this is tricky)
             this.destType = args.getInt(1);
@@ -171,6 +178,10 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             this.allowEdit = args.getBoolean(7);
             this.correctOrientation = args.getBoolean(8);
             this.saveToPhotoAlbum = args.getBoolean(9);
+
+            if (args.length() > 12) {
+                   this.flashMode = args.getInt(12);
+            }
 
             // If the user specifies a 0 or smaller width/height
             // make it -1 so later comparisons succeed
@@ -308,6 +319,10 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
 
     public void takePicture(int returnType, int encodingType)
     {
+
+       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP && srcType == CAMERA){
+              this.takePictureWithCameraX(returnType, encodingType);
+       } else {
         // Let's use the intent and see what happens
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
@@ -335,6 +350,56 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             }
         }
     }
+    }
+
+       /**
+        * Takes a picture using the CameraX API.
+        */
+       private void takePictureWithCameraX(int returnType, int encodingType) {
+           // Create intent for CameraXActivity
+           Intent intent = new Intent(cordova.getActivity(), CameraXActivity.class);
+
+           // Specify file so that large image is captured and returned
+           File photo = createCaptureFile(encodingType);
+           this.imageUri = FileProvider.getUriForFile(
+               cordova.getActivity(),
+               applicationId + ".cordova.plugin.camera.provider",
+               photo
+           );
+           intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+           intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+           // Map Cordova flash mode to CameraX flash mode
+           int cameraXFlashMode;
+           switch (this.flashMode) {
+               case FLASH_ON:
+                   cameraXFlashMode = ImageCapture.FLASH_MODE_ON;
+                   break;
+               case FLASH_OFF:
+                   cameraXFlashMode = ImageCapture.FLASH_MODE_OFF;  // This maps -1 to 2
+                   break;
+               case FLASH_AUTO:
+               default:
+                   cameraXFlashMode = ImageCapture.FLASH_MODE_AUTO;
+                   break;
+    }
+           
+           // Pass the required parameters
+           intent.putExtra("returnType", returnType);
+           intent.putExtra("encodingType", encodingType);
+           
+           // Pass all the other parameters from CameraLauncher's instance variables
+           intent.putExtra("quality", this.mQuality);
+           intent.putExtra("targetWidth", this.targetWidth);
+           intent.putExtra("targetHeight", this.targetHeight);
+           intent.putExtra("saveToPhotoAlbum", this.saveToPhotoAlbum);
+           intent.putExtra("correctOrientation", this.correctOrientation);
+           intent.putExtra("allowEdit", this.allowEdit);
+           intent.putExtra("flashMode", cameraXFlashMode);
+           
+           // Launch the activity
+           this.cordova.startActivityForResult((CordovaPlugin) this, intent, (CAMERA + 1) * 16 + returnType + 1);
+       }
 
     /**
      * Create a file in the applications temporary directory based upon the supplied encoding.
@@ -885,7 +950,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
      * @param intent      An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-
+           LOG.d("CameraLauncher", "onActivityResult: requestCode=" + requestCode + ", resultCode=" + resultCode);
         // Get src and dest types from request code for a Camera Activity
         int srcType = (requestCode / 16) - 1;
         int destType = (requestCode % 16) - 1;
@@ -918,7 +983,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         else if (srcType == CAMERA) {
             // If image available
             if (resultCode == Activity.RESULT_OK) {
-                try {
+              try {
                     if (this.allowEdit) {
                         Uri tmpFile = FileProvider.getUriForFile(cordova.getActivity(),
                         applicationId + ".cordova.plugin.camera.provider",
