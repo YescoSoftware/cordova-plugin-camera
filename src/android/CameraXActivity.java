@@ -147,7 +147,9 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     private boolean isUserControllingExposure = false;
     private float currentExposureValue = 0f; 
     private float minExposure = -3.0f; 
-    private float maxExposure = 3.0f;  
+    private float maxExposure = 3.0f;
+    private long lastScaleEndTime = 0;
+    private static final long SCALE_COOLDOWN_PERIOD = 300;
     
     private ImageCapture imageCapture;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -800,7 +802,11 @@ if (hideExposureControlsRunnable == null) {
             @Override
             public void onScaleEnd(ScaleGestureDetector detector) {
                 // Hide zoom controls after a delay
+                lastScaleEndTime = System.currentTimeMillis();
                 handler.postDelayed(hideZoomControlsRunnable, 2000);
+                if (exposureControlContainer != null && exposureControlContainer.getVisibility() == View.VISIBLE) {
+                    hideExposureControls();
+            }
             }
         });
     }
@@ -816,7 +822,7 @@ if (previewView != null) {
             camera != null && !scaleGestureDetector.isInProgress()) {
             
             // Only handle simple taps
-            if (event.getPointerCount() <= 1) {
+            if (event.getPointerCount() <= 1 && System.currentTimeMillis() - lastScaleEndTime > SCALE_COOLDOWN_PERIOD) {
                 // Get the tap coordinates
                 float x = event.getX();
                 float y = event.getY();
