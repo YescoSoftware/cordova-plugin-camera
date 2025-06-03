@@ -71,6 +71,7 @@
                 android:background="@drawable/ic_flash_off"
                 android:contentDescription="Flash Off" />
         </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Bottom Controls Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
