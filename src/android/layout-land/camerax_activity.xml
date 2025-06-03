@@ -27,11 +27,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Flash Button - Now at bottom of left bar -->
+        <!-- Flash Button -->
         <ImageButton
             android:id="@+id/flash_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:background="@drawable/ic_flash_auto"
             android:contentDescription="Flash Mode"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -53,38 +53,27 @@
 
             <ImageButton
                 android:id="@+id/flash_auto_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/ic_flash_auto"
                 android:contentDescription="Auto Flash" />
 
             <ImageButton
                 android:id="@+id/flash_on_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/ic_flash_on"
                 android:contentDescription="Flash On" />
 
             <ImageButton
                 android:id="@+id/flash_off_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:background="@drawable/ic_flash_off"
                 android:contentDescription="Flash Off" />
         </LinearLayout>
-
-        <!-- Camera Flip Button - Now at top of left bar -->
-        <ImageButton
-            android:id="@+id/camera_flip_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/ic_camera_flip"
-            android:contentDescription="Switch Camera"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Right Controls Container (was bottom in portrait) -->
@@ -98,7 +87,18 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Capture Button - Centered on right side -->
+        <!-- Camera Flip Button - Top right corner -->
+        <ImageButton
+            android:id="@+id/camera_flip_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/ic_camera_flip"
+            android:contentDescription="Switch Camera"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Capture Button -->
         <ImageButton
             android:id="@+id/capture_button"
             android:layout_width="72dp"
