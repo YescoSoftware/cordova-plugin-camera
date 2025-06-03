@@ -28,8 +28,8 @@
         <!-- Flash Button -->
         <ImageButton
             android:id="@+id/flash_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
             android:background="@drawable/ic_flash_auto"
             android:contentDescription="Flash Mode"
             app:layout_constraintStart_toStartOf="parent"
