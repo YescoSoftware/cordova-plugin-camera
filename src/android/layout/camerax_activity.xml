@@ -16,7 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Action Bar containing flash and camera flip buttons -->
+    <!-- Action Bar containing flash -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/action_bar_background"
         android:layout_width="match_parent"
@@ -28,8 +28,8 @@
         <!-- Flash Button -->
         <ImageButton
             android:id="@+id/flash_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:background="@drawable/ic_flash_auto"
             android:contentDescription="Flash Mode"
             app:layout_constraintStart_toStartOf="parent"
@@ -50,38 +50,27 @@
 
             <ImageButton
                 android:id="@+id/flash_auto_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/ic_flash_auto"
                 android:contentDescription="Auto Flash" />
 
             <ImageButton
                 android:id="@+id/flash_on_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/ic_flash_on"
                 android:contentDescription="Flash On" />
 
             <ImageButton
                 android:id="@+id/flash_off_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:background="@drawable/ic_flash_off"
                 android:contentDescription="Flash Off" />
         </LinearLayout>
-
-        <!-- Camera Flip Button -->
-        <ImageButton
-            android:id="@+id/camera_flip_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/ic_camera_flip"
-            android:contentDescription="Switch Camera"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Bottom Controls Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -122,6 +111,7 @@
                 android:text="1x"
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
+            
         </LinearLayout>
 
         <!-- Capture Button -->
@@ -134,6 +124,15 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageButton
+            android:id="@+id/camera_flip_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/ic_camera_flip"
+            android:contentDescription="Switch Camera"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Zoom Seek Bar -->
