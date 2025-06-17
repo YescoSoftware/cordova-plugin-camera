@@ -1482,7 +1482,6 @@ private void startCamera() {
             super.onBackPressed();
         }
     }
-    }
     
     @Override
     protected void onDestroy() {
@@ -1509,4 +1508,3 @@ private void startCamera() {
 
         System.gc();
     }
-}
