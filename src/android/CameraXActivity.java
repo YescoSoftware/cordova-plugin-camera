@@ -13,6 +13,7 @@ import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.hardware.camera2.CameraCharacteristics;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -75,6 +76,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,7 +109,21 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     private int originalBottomPadding = 0;
     private boolean originalPaddingSaved = false;
 
+    // Preview mode
+    private Bitmap currentPreviewBitmap;
+    private boolean isInPreviewMode = false;
+    private Uri capturedImageUri;
+    private File tempImageUri;
+    private LoadImageTask loadImageTask;
+
+    private ConstraintLayout bottomControls;
+    private ConstraintLayout previewControls;
+    private ConstraintLayout actionBarBackground;
+    private Button retakeButton;
+    private Button usePhotoButton;
+
     private PreviewView previewView;
+    private ImageView imagePreview;
     private ImageButton captureButton;
     private ImageButton cameraFlipButton;
     private ImageButton flashButton;
@@ -147,7 +163,9 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     private boolean isUserControllingExposure = false;
     private float currentExposureValue = 0f; 
     private float minExposure = -3.0f; 
-    private float maxExposure = 3.0f;  
+    private float maxExposure = 3.0f;
+    private long lastScaleEndTime = 0;
+    private static final long SCALE_COOLDOWN_PERIOD = 300;
     
     private ImageCapture imageCapture;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -183,6 +201,26 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
         allowEdit = intent.getBooleanExtra("allowEdit", false);
         encodingType = intent.getIntExtra("encodingType",0);
         flashMode = intent.getIntExtra("flashMode", ImageCapture.FLASH_MODE_AUTO);
+
+        capturedImageUri = getIntent().getParcelableExtra(MediaStore.EXTRA_OUTPUT);
+
+        // Restore state if needed
+        if (savedInstanceState != null) {
+            isInPreviewMode = savedInstanceState.getBoolean("isInPreviewMode", false);
+            String tempPath = savedInstanceState.getString("tempImagePath");
+            if (tempPath != null) {
+                tempImageFile = new File(tempPath);
+                if (!tempImageFile.exists()) {
+                    tempImageFile = null;
+                    isInPreviewMode = false;
+                }
+            }
+            
+            // Restore UI state after views are initialized
+            if (isInPreviewMode && tempImageFile != null) {
+                showPreviewMode();
+            }
+        }
         
         setFlashButtonIcon(flashMode);
         
@@ -194,6 +232,207 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
             startCamera();
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isInPreviewMode", isInPreviewMode);
+        if (tempImageFile != null) {
+            outState.putString("tempImagePath", tempImageFile.getAbsolutePath());
+        }
+    }
+    
+    private static class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
+        private final WeakReference<CameraXActivity> activityRef;
+        
+        LoadImageTask(CameraXActivity activity) {
+            this.activityRef = new WeakReference<>(activity);
+        }
+        
+        @Override
+        protected Bitmap doInBackground(String... paths) {
+            if (isCancelled()) return null;
+            
+            String imagePath = paths[0];
+            
+            // Get the dimensions of the ImageView
+            CameraXActivity activity = activityRef.get();
+            if (activity == null || activity.imagePreview == null) return null;
+            
+            // Calculate target dimensions (use screen size as fallback)
+            int targetWidth = 1080;  // Max width for preview
+            int targetHeight = 1920; // Max height for preview
+            
+            // First decode with inJustDecodeBounds=true to check dimensions
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(imagePath, options);
+            
+            if (isCancelled()) return null;
+            
+            // Calculate sample size to reduce memory usage
+            int sampleSize = calculateInSampleSize(options, targetWidth, targetHeight);
+            
+            // Decode with inSampleSize set
+            options.inJustDecodeBounds = false;
+            options.inSampleSize = sampleSize;
+            options.inPreferredConfig = Bitmap.Config.RGB_565; // Use less memory
+            
+            return BitmapFactory.decodeFile(imagePath, options);
+        }
+        
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            CameraXActivity activity = activityRef.get();
+            if (activity == null || activity.imagePreview == null) {
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
+                return;
+            }
+            
+            if (bitmap != null) {
+                // Clean up previous bitmap
+                activity.cleanupPreviewBitmap();
+                
+                // Set new bitmap
+                activity.currentPreviewBitmap = bitmap;
+                activity.imagePreview.setImageBitmap(bitmap);
+            } else {
+                Log.e(TAG, "Failed to load preview image");
+                Toast.makeText(activity, "Error displaying preview", Toast.LENGTH_SHORT).show();
+                activity.showCameraMode();
+            }
+        }
+        
+        private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+            final int height = options.outHeight;
+            final int width = options.outWidth;
+            int inSampleSize = 1;
+            
+            if (height > reqHeight || width > reqWidth) {
+                final int halfHeight = height / 2;
+                final int halfWidth = width / 2;
+                
+                while ((halfHeight / inSampleSize) >= reqHeight
+                        && (halfWidth / inSampleSize) >= reqWidth) {
+                    inSampleSize *= 2;
+                }
+            }
+            return inSampleSize;
+        }
+    }
+    
+    // Cleanup methods
+    private void cleanupPreviewBitmap() {
+        if (currentPreviewBitmap != null && !currentPreviewBitmap.isRecycled()) {
+            currentPreviewBitmap.recycle();
+            currentPreviewBitmap = null;
+        }
+    }
+    
+    private void cleanupTempFile() {
+        if (tempImageFile != null && tempImageFile.exists()) {
+            try {
+                tempImageFile.delete();
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to delete temp file: " + e.getMessage());
+            }
+            tempImageFile = null;
+        }
+    }
+    
+    // Preview mode methods
+    private void showPreviewMode() {
+        isInPreviewMode = true;
+        
+        // Hide camera UI
+        previewView.setVisibility(View.GONE);
+        bottomControls.setVisibility(View.GONE);
+        actionBarBackground.setVisibility(View.GONE);
+        
+        // Show preview UI
+        imagePreview.setVisibility(View.VISIBLE);
+        previewControls.setVisibility(View.VISIBLE);
+        
+        // Load and display the captured image
+        displayCapturedImage();
+    }
+    
+    private void showCameraMode() {
+        isInPreviewMode = false;
+        
+        // Show camera UI
+        previewView.setVisibility(View.VISIBLE);
+        bottomControls.setVisibility(View.VISIBLE);
+        actionBarBackground.setVisibility(View.VISIBLE);
+        
+        // Hide preview UI
+        imagePreview.setVisibility(View.GONE);
+        previewControls.setVisibility(View.GONE);
+        
+        // Clean up preview bitmap and temp file
+        cleanupPreviewBitmap();
+        cleanupTempFile();
+    }
+    
+    private void displayCapturedImage() {
+        if (tempImageFile != null && tempImageFile.exists()) {
+            // Cancel any existing image loading task
+            if (loadImageTask != null && !loadImageTask.isCancelled()) {
+                loadImageTask.cancel(true);
+            }
+            
+            // Start new background task to load and scale image
+            loadImageTask = new LoadImageTask(this);
+            loadImageTask.execute(tempImageFile.getAbsolutePath());
+        }
+    }
+    
+    private void handleRetake() {
+        showCameraMode();
+    }
+    
+    private void handleUsePhoto() {
+        if (tempImageFile != null && tempImageFile.exists() && capturedImageUri != null) {
+            try {
+                // Copy the temp file to the expected output URI
+                InputStream inputStream = new FileInputStream(tempImageFile);
+                OutputStream outputStream = getContentResolver().openOutputStream(capturedImageUri);
+                
+                if (outputStream != null) {
+                    byte[] buffer = new byte[8192]; // Larger buffer for better performance
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, bytesRead);
+                    }
+                    
+                    inputStream.close();
+                    outputStream.close();
+                    
+                    // Clean up resources
+                    cleanupPreviewBitmap();
+                    cleanupTempFile();
+                    
+                    // Return success to Cordova
+                    setResult(Activity.RESULT_OK);
+                    finish();
+                } else {
+                    Log.e(TAG, "Failed to open output stream");
+                    setResult(Activity.RESULT_CANCELED);
+                    finish();
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error copying final image: " + e.getMessage());
+                setResult(Activity.RESULT_CANCELED);
+                finish();
+            }
+        } else {
+            Log.e(TAG, "No temp image file or output URI");
+            setResult(Activity.RESULT_CANCELED);
+            finish();
         }
     }
     
@@ -396,6 +635,7 @@ public void onConfigurationChanged(Configuration newConfig) {
         boolean isCameraRunning = camera != null;
         int currentCameraFacing = cameraFacing;
         boolean currentUsingUltraWide = usingUltraWideCamera;
+        boolean currentPreviewMode = isInPreviewMode;
         
         // Manually apply the appropriate layout
         setContentView(getResources().getIdentifier("camerax_activity", "layout", getPackageName()));
@@ -404,10 +644,12 @@ public void onConfigurationChanged(Configuration newConfig) {
         initializeViews();
         
         // Restore camera state
-        if (isCameraRunning) {
+        if (isCameraRunning && !currentPreviewMode) {
             cameraFacing = currentCameraFacing;
             usingUltraWideCamera = currentUsingUltraWide;
             startCamera();
+        } else if (currentPreviewMode) {
+            showPreviewMode();
         }
         
         // Update padding for system UI
@@ -558,6 +800,13 @@ private void initializeViews() {
     exposureControlContainer = findViewById(getResources().getIdentifier("exposure_control_container", "id", getPackageName()));
     exposureSeekBar = findViewById(getResources().getIdentifier("exposure_seekbar", "id", getPackageName()));
 
+    // Preview mode UI elements
+    
+    bottomControls = findViewById(getResources().getIdentifier("bottom_controls", "id", getPackageName()));
+    previewControls = findViewById(getResources().getIdentifier("preview_controls", "id", getPackageName()));
+    actionBarBackground = findViewById(getResources().getIdentifier("action_bar_background", "id", getPackageName()));
+    retakeButton = findViewById(getResources().getIdentifier("retake_button", "id", getPackageName()));
+    usePhotoButton = findViewById(getResources().getIdentifier("use_photo_button", "id", getPackageName()));
 
     // exposure logic
 
@@ -699,6 +948,8 @@ if (hideExposureControlsRunnable == null) {
     if (flashOffButton != null) flashOffButton.setOnClickListener(this);
     if (wideAngleButton != null) wideAngleButton.setOnClickListener(this);
     if (normalZoomButton != null) normalZoomButton.setOnClickListener(this);
+    if (retakeButton != null) retakeButton.setOnClickListener(this);
+    if (usePhotoButton != null) usePhotoButton.setOnClickListener(this);
     
     // Set up pinch gesture detector if it's not already initialized
     if (scaleGestureDetector == null) {
@@ -707,6 +958,9 @@ if (hideExposureControlsRunnable == null) {
             
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
+                if (isInPreviewMode) {
+                    return false;
+                }
                 if (camera == null) {
                     return false;
                 }
@@ -776,6 +1030,9 @@ if (hideExposureControlsRunnable == null) {
             
             @Override
             public boolean onScaleBegin(ScaleGestureDetector detector) {
+                if (isInPreviewMode) {
+                    return false;
+                }
                 if (camera != null) {
                     ZoomState zoomState = camera.getCameraInfo().getZoomState().getValue();
                     if (zoomState != null) {
@@ -808,6 +1065,10 @@ if (hideExposureControlsRunnable == null) {
    // set up touch listener for zoom and exposure
 if (previewView != null) {
     previewView.setOnTouchListener((view, event) -> {
+
+        if (isInPreviewMode) {
+            return false;
+        }
         // Handle scale gestures for zoom
         boolean handled = scaleGestureDetector.onTouchEvent(event);
         
@@ -1104,61 +1365,54 @@ private void startCamera() {
 }
     
      private void takePhoto() {
-    if (imageCapture == null) {
-        Log.e(TAG, "imageCapture is null");
-        return;
-    }
-    
-    // Get the URI passed from CameraLauncher
-    Uri outputUri = getIntent().getParcelableExtra(MediaStore.EXTRA_OUTPUT);
-    
-    if (outputUri == null) {
-        Log.e(TAG, "No output URI provided");
-        setResult(Activity.RESULT_CANCELED);
-        finish();
-        return;
-    }
-    
-    try {
-        OutputStream outputStream = getContentResolver().openOutputStream(outputUri);
-        if (outputStream == null) {
-            Log.e(TAG, "Failed to open output stream for URI: " + outputUri);
+        if (imageCapture == null) {
+            Log.e(TAG, "imageCapture is null");
+            return;
+        }
+        
+        if (capturedImageUri == null) {
+            Log.e(TAG, "No output URI provided");
             setResult(Activity.RESULT_CANCELED);
             finish();
             return;
         }
         
-        // Create output options with the output stream
-        ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(outputStream).build();
-    
-            // Take the picture
-            imageCapture.takePicture(
-                outputOptions,
-                executor,
-                new ImageCapture.OnImageSavedCallback() {
-                    @Override
-                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
-                        // Just return success - the image has been saved to the URI that Cordova expects
-                        setResult(Activity.RESULT_OK);
-                        finish();
+        try {
+            // Create a temporary file to save the image first
+            tempImageFile = File.createTempFile("temp_capture", ".jpg", getCacheDir());
+            
+            // Create output options with the temporary file
+            ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(tempImageFile).build();
+        
+                // Take the picture
+                imageCapture.takePicture(
+                    outputOptions,
+                    executor,
+                    new ImageCapture.OnImageSavedCallback() {
+                        @Override
+                        public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                            // Show preview mode instead of immediately returning
+                            runOnUiThread(() -> {
+                                showPreviewMode();
+                            });
+                        }
+                    
+                        @Override
+                        public void onError(@NonNull ImageCaptureException exception) {
+                            Log.e(TAG, "Photo capture failed: " + exception.getMessage());
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("error", exception.getMessage());
+                            setResult(Activity.RESULT_CANCELED, resultIntent);
+                            finish();
+                        }
                     }
-                
-                    @Override
-                    public void onError(@NonNull ImageCaptureException exception) {
-                        Log.e(TAG, "Photo capture failed: " + exception.getMessage());
-                        Intent resultIntent = new Intent();
-                        resultIntent.putExtra("error", exception.getMessage());
-                        setResult(Activity.RESULT_CANCELED, resultIntent);
-                        finish();
-                    }
-                }
-        );
-    } catch (Exception e) {
-        Log.e(TAG, "Error setting up image capture: " + e.getMessage());
-        setResult(Activity.RESULT_CANCELED);
-        finish();
-    }
-}  
+            );
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up image capture: " + e.getMessage());
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+        }
+    }  
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -1206,12 +1460,28 @@ private void startCamera() {
     @Override
     protected void onPause() {
         super.onPause();
+
+        if (loadImageTask != null && !loadImageTask.isCancelled()) {
+            loadImageTask.cancel(true);
+            loadImageTask = null;
+        }
+        
+        // Clean up preview bitmap to free memory
+        cleanupPreviewBitmap();
+    }
     }
     
     @Override
     public void onBackPressed() {
-        setResult(Activity.RESULT_CANCELED);
-        super.onBackPressed();
+        if (isInPreviewMode) {
+            // If in preview mode, go back to camera
+            handleRetake();
+        } else {
+            // If in camera mode, exit
+            setResult(Activity.RESULT_CANCELED);
+            super.onBackPressed();
+        }
+    }
     }
     
     @Override
@@ -1223,6 +1493,15 @@ private void startCamera() {
 
         handler.removeCallbacks(hideZoomControlsRunnable);
         exposureHideHandler.removeCallbacks(hideExposureControlsRunnable);
+
+         if (loadImageTask != null && !loadImageTask.isCancelled()) {
+            loadImageTask.cancel(true);
+            loadImageTask = null;
+        }
+
+        // Clean up resources
+        cleanupPreviewBitmap();
+        cleanupTempFile();
 
         if (!executor.isShutdown()) {
             executor.shutdown();
