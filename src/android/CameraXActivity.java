@@ -27,8 +27,10 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -229,7 +231,9 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
         
         // Check and request permissions
         if (allPermissionsGranted()) {
+            if (!isInPreviewMode) {
             startCamera();
+            }
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
@@ -487,7 +491,11 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
         switchToWideAngleCamera();
         } else if (id == getResources().getIdentifier("normal_zoom_button", "id", getPackageName())) {
             switchToNormalCamera();
-        } 
+        } else if (id == getResources().getIdentifier("retake_button", "id", getPackageName())) {
+            handleRetake();
+        } else if (id == getResources().getIdentifier("use_photo_button", "id", getPackageName())) {
+            handleUsePhoto();
+        }
     }
     
     // Flash Methods
@@ -667,15 +675,12 @@ public void onConfigurationChanged(Configuration newConfig) {
 
 // Helper method to update padding for navigation bars
 private void updateNavigationBarPadding(int orientation) {
-    ConstraintLayout controlsLayout = findViewById(getResources().getIdentifier("bottom_controls", "id", getPackageName()));
-    
-    if (controlsLayout != null) {
-        // Save original paddings the first time
+    if (bottomControls!= null){
         if (!originalPaddingSaved && isInitialSetup) {
-            originalLeftPadding = controlsLayout.getPaddingLeft();
-            originalTopPadding = controlsLayout.getPaddingTop();
-            originalRightPadding = controlsLayout.getPaddingRight();
-            originalBottomPadding = controlsLayout.getPaddingBottom();
+            originalLeftPadding = bottomControls.getPaddingLeft();
+            originalTopPadding = bottomControls.getPaddingTop();
+            originalRightPadding = bottomControls.getPaddingRight();
+            originalBottomPadding = bottomControls.getPaddingBottom();
             originalPaddingSaved = true;
             isInitialSetup = false;
         }
@@ -689,13 +694,13 @@ private void updateNavigationBarPadding(int orientation) {
         
         // Apply appropriate padding based on orientation
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            controlsLayout.setPadding(
+            bottomControls.setPadding(
                 originalLeftPadding,
                 originalTopPadding,
                 originalRightPadding,
                 navBarHeight + 16);
         } else {
-            controlsLayout.setPadding(
+            bottomControls.setPadding(
                 originalLeftPadding,
                 originalTopPadding,
                 navBarHeight + 16,
@@ -785,6 +790,7 @@ private void hideExposureControls() {
 private void initializeViews() {
     // Find all UI elements by resource ID
     previewView = findViewById(getResources().getIdentifier("preview_view", "id", getPackageName()));
+    imagePreview = findViewById(getResources().getIdentifier("image_preview", "id", getPackageName()));
     captureButton = findViewById(getResources().getIdentifier("capture_button", "id", getPackageName()));
     cameraFlipButton = findViewById(getResources().getIdentifier("camera_flip_button", "id", getPackageName()));
     flashButton = findViewById(getResources().getIdentifier("flash_button", "id", getPackageName()));
