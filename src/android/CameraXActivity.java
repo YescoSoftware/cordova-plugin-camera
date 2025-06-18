@@ -1578,30 +1578,64 @@ private void startCamera() {
         }
     }
     
-    @Override
-    protected void onDestroy() {
-        if (orientationListener != null) {
+@Override
+protected void onDestroy() {
+    // Disable listeners first
+    if (orientationListener != null) {
         orientationListener.disable();
+        orientationListener = null;
     }
-        super.onDestroy();
-
-        handler.removeCallbacks(hideZoomControlsRunnable);
-        exposureHideHandler.removeCallbacks(hideExposureControlsRunnable);
-
-         if (loadImageTask != null && !loadImageTask.isCancelled()) {
-            loadImageTask.cancel(true);
-            loadImageTask = null;
-        }
-
-        if (!isChangingConfigurations()) {
+    
+    // Cancel any running AsyncTask
+    if (loadImageTask != null) {
+        loadImageTask.cancel(true);
+        loadImageTask = null;
+    }
+    
+    // Clear all handler callbacks
+    if (handler != null) {
+        handler.removeCallbacksAndMessages(null);
+    }
+    if (exposureHideHandler != null) {
+        exposureHideHandler.removeCallbacksAndMessages(null);
+    }
+    
+    // Remove camera observers
+    if (zoomStateLiveData != null) {
+        zoomStateLiveData.removeObservers(this);
+        zoomStateLiveData = null;
+    }
+    
+    // Clean up camera
+    if (camera != null) {
+        camera = null;
+    }
+    
+    // Clean up resources only if not changing configuration
+    if (!isChangingConfigurations()) {
         cleanupPreviewBitmap();
         cleanupTempFile();
     }
-
-        if (!executor.isShutdown()) {
-            executor.shutdown();
+    
+    // Properly shutdown executor
+    if (executor != null && !executor.isShutdown()) {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
         }
-
-        System.gc();
     }
+    
+    // Clear view references
+    previewView = null;
+    imagePreview = null;
+    scaleGestureDetector = null;
+    
+    super.onDestroy();
+    
+    System.gc();
+}
 }
