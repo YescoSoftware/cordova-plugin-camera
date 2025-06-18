@@ -341,7 +341,6 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
             }
             return inSampleSize;
         }
-    }
 
     private Bitmap rotateImageIfRequired(Bitmap bitmap, String imagePath) {
         try {
