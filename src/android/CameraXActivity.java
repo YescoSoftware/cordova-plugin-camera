@@ -424,6 +424,8 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
         previewControls.setVisibility(View.VISIBLE);
         
         // Load and display the captured image
+
+        updateNavigationBarPadding(getResources().getConfiguration().orientation);
         displayCapturedImage();
     }
     
@@ -761,6 +763,13 @@ public void onConfigurationChanged(Configuration newConfig) {
 
 // Helper method to update padding for navigation bars
 private void updateNavigationBarPadding(int orientation) {
+    // Get navigation bar height
+    int navBarHeightId = getResources().getIdentifier("navigation_bar_height", "dimen", "android");
+    int navBarHeight = 0;
+    if (navBarHeightId > 0) {
+        navBarHeight = getResources().getDimensionPixelSize(navBarHeightId);
+    }
+    
     if (bottomControls!= null){
         if (!originalPaddingSaved && isInitialSetup) {
             originalLeftPadding = bottomControls.getPaddingLeft();
@@ -769,13 +778,6 @@ private void updateNavigationBarPadding(int orientation) {
             originalBottomPadding = bottomControls.getPaddingBottom();
             originalPaddingSaved = true;
             isInitialSetup = false;
-        }
-        
-        // Get navigation bar height
-        int navBarHeightId = getResources().getIdentifier("navigation_bar_height", "dimen", "android");
-        int navBarHeight = 0;
-        if (navBarHeightId > 0) {
-            navBarHeight = getResources().getDimensionPixelSize(navBarHeightId);
         }
         
         // Apply appropriate padding based on orientation
@@ -791,6 +793,23 @@ private void updateNavigationBarPadding(int orientation) {
                 originalTopPadding,
                 navBarHeight + 16,
                 originalBottomPadding + 5);
+        }
+    }
+    
+    //update the preview screen as well
+    if (previewControls != null) {
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            previewControls.setPadding(
+                previewControls.getPaddingLeft(),
+                previewControls.getPaddingTop(),
+                previewControls.getPaddingRight(),
+                navBarHeight + 16);
+        } else {
+            previewControls.setPadding(
+                previewControls.getPaddingLeft(),
+                previewControls.getPaddingTop(),
+                navBarHeight + 16,
+                previewControls.getPaddingBottom());
         }
     }
 }
