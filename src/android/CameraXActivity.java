@@ -300,11 +300,19 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
         }
     }
 
-        
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             CameraXActivity activity = activityRef.get();
-            if (activity == null || activity.imagePreview == null) {
+            if (activity == null || activity.isFinishing() || activity.isDestroyed()) {
+                // Activity is gone, clean up the bitmap
+                if (bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
+                return;
+            }
+            
+            if (activity.imagePreview == null) {
+                // View is not available, clean up
                 if (bitmap != null && !bitmap.isRecycled()) {
                     bitmap.recycle();
                 }
@@ -312,7 +320,7 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
             }
             
             if (bitmap != null) {
-                // Clean up previous bitmap
+                // Clean up previous bitmap properly
                 activity.cleanupPreviewBitmap();
                 
                 // Set new bitmap
@@ -381,6 +389,10 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     
     // Cleanup methods
     private void cleanupPreviewBitmap() {
+        if (imagePreview != null) {
+                imagePreview.setImageDrawable(null);
+            }
+             
         if (currentPreviewBitmap != null && !currentPreviewBitmap.isRecycled()) {
             currentPreviewBitmap.recycle();
             currentPreviewBitmap = null;
@@ -707,6 +719,10 @@ public void onConfigurationChanged(Configuration newConfig) {
             loadImageTask.cancel(true);
             loadImageTask = null;
         }
+
+        if (imagePreview != null) {
+            imagePreview.setImageDrawable(null);
+        }
         
         // Manually apply the appropriate layout
         setContentView(getResources().getIdentifier("camerax_activity", "layout", getPackageName()));
@@ -715,8 +731,13 @@ public void onConfigurationChanged(Configuration newConfig) {
         initializeViews();
         
         // Restore camera state
-        if (currentPreviewMode) {
-            // If we were in preview mode, restore it
+        if (currentPreviewMode && currentPreviewBitmap != null && !currentPreviewBitmap.isRecycled()) {
+            // If we were in preview mode and have a valid bitmap, restore it
+            showPreviewMode();
+            // Directly set the existing bitmap instead of reloading
+            imagePreview.setImageBitmap(currentPreviewBitmap);
+        } else if (currentPreviewMode && tempImageFile != null && tempImageFile.exists()) {
+            // If bitmap was lost but file exists, reload it
             showPreviewMode();
         } else if (isCameraRunning) {
             // If camera was running, restart it
@@ -1535,14 +1556,13 @@ private void startCamera() {
     @Override
     protected void onPause() {
         super.onPause();
-
         if (loadImageTask != null && !loadImageTask.isCancelled()) {
             loadImageTask.cancel(true);
             loadImageTask = null;
         }
-        
-        // Clean up preview bitmap to free memory
-        cleanupPreviewBitmap();
+         if (imagePreview != null && !isChangingConfigurations()) {
+        imagePreview.setImageDrawable(null);
+    }
     }
     
     
@@ -1573,9 +1593,10 @@ private void startCamera() {
             loadImageTask = null;
         }
 
-        // Clean up resources
+        if (!isChangingConfigurations()) {
         cleanupPreviewBitmap();
         cleanupTempFile();
+    }
 
         if (!executor.isShutdown()) {
             executor.shutdown();
