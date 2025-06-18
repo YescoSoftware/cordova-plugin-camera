@@ -16,6 +16,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Image Preview (hidden by default) -->
+    <ImageView
+        android:id="@+id/image_preview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:scaleType="fitCenter"
+        android:background="@android:color/black"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <!-- Action Bar containing flash -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/action_bar_background"
@@ -71,7 +84,7 @@
                 android:background="@drawable/ic_flash_off"
                 android:contentDescription="Flash Off" />
         </LinearLayout>
-        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Bottom Controls Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -136,6 +149,47 @@
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- Preview Controls (hidden by default) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/preview_controls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#33000000"
+        android:padding="16dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Retake Button -->
+        <Button
+            android:id="@+id/retake_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginEnd="24dp"
+            android:background="@android:color/transparent"
+            android:text="Retake"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:minWidth="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Use Photo Button -->
+        <Button
+            android:id="@+id/use_photo_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginStart="24dp"
+            android:background="@android:color/transparent"
+            android:text="Use Photo"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:minWidth="100dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <!-- Zoom Seek Bar -->
     <SeekBar
         android:id="@+id/zoom_seekbar"
@@ -164,32 +218,32 @@
         app:layout_constraintEnd_toEndOf="@id/zoom_seekbar" />
     
     <!-- Exposure controls frame for positioning -->
-<FrameLayout
-    android:id="@+id/exposure_controls_frame"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent">
+    <FrameLayout
+        android:id="@+id/exposure_controls_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <LinearLayout
-        android:id="@+id/exposure_control_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:visibility="gone"
-        android:gravity="center_vertical">
-
-        <SeekBar
-            android:id="@+id/exposure_seekbar"
-            android:layout_width="100dp"
+        <LinearLayout
+            android:id="@+id/exposure_control_container"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:progressTint="#FFEB3B"
-            android:progressBackgroundTint="#FFEB3B"
-            android:thumb="@drawable/exposure_control" />
-    </LinearLayout>
-</FrameLayout>
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:visibility="gone"
+            android:gravity="center_vertical">
+
+            <SeekBar
+                android:id="@+id/exposure_seekbar"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:progressTint="#FFEB3B"
+                android:progressBackgroundTint="#FFEB3B"
+                android:thumb="@drawable/exposure_control" />
+        </LinearLayout>
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
