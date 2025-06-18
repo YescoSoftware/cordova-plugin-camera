@@ -265,27 +265,41 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
             CameraXActivity activity = activityRef.get();
             if (activity == null || activity.imagePreview == null) return null;
             
-            // Calculate target dimensions (use screen size as fallback)
-            int targetWidth = 1080;  // Max width for preview
-            int targetHeight = 1920; // Max height for preview
+            try {
             
-            // First decode with inJustDecodeBounds=true to check dimensions
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeFile(imagePath, options);
+                int targetWidth = 1080;
+                int targetHeight = 1920;
+                
+                // First decode with inJustDecodeBounds=true to check dimensions
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(imagePath, options);
+                
+                if (isCancelled()) return null;
+                
+                // Calculate sample size to reduce memory usage
+                int sampleSize = calculateInSampleSize(options, targetWidth, targetHeight);
+                
+                // Decode with inSampleSize set
+                options.inJustDecodeBounds = false;
+                options.inSampleSize = sampleSize;
+                options.inPreferredConfig = Bitmap.Config.RGB_565;
+                
+                Bitmap bitmap = BitmapFactory.decodeFile(imagePath, options);
+                
+                if (bitmap == null || isCancelled()) return null;
+                
+                // Handle rotation based on EXIF data
+                bitmap = rotateImageIfRequired(bitmap, imagePath);
+                
+                return bitmap;
             
-            if (isCancelled()) return null;
-            
-            // Calculate sample size to reduce memory usage
-            int sampleSize = calculateInSampleSize(options, targetWidth, targetHeight);
-            
-            // Decode with inSampleSize set
-            options.inJustDecodeBounds = false;
-            options.inSampleSize = sampleSize;
-            options.inPreferredConfig = Bitmap.Config.RGB_565; // Use less memory
-            
-            return BitmapFactory.decodeFile(imagePath, options);
+        } catch (Exception e) {
+            Log.e("LoadImageTask", "Error loading image: " + e.getMessage());
+            return null;
         }
+    }
+
         
         @Override
         protected void onPostExecute(Bitmap bitmap) {
@@ -328,6 +342,43 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
             return inSampleSize;
         }
     }
+
+    private Bitmap rotateImageIfRequired(Bitmap bitmap, String imagePath) {
+        try {
+            ExifInterface ei = new ExifInterface(imagePath);
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            
+            switch (orientation) {
+                case ExifInterface.ORIENTATION_ROTATE_90:
+                    return rotateImage(bitmap, 90);
+                case ExifInterface.ORIENTATION_ROTATE_180:
+                    return rotateImage(bitmap, 180);
+                case ExifInterface.ORIENTATION_ROTATE_270:
+                    return rotateImage(bitmap, 270);
+                default:
+                    return bitmap;
+            }
+        } catch (IOException e) {
+            Log.w("LoadImageTask", "Could not read EXIF data: " + e.getMessage());
+            return bitmap;
+        }
+    }
+    
+    private Bitmap rotateImage(Bitmap source, float angle) {
+        Matrix matrix = new Matrix();
+        matrix.postRotate(angle);
+        
+        Bitmap rotatedBitmap = Bitmap.createBitmap(source, 0, 0, 
+            source.getWidth(), source.getHeight(), matrix, true);
+        
+        // Recycle original if it's different from rotated
+        if (rotatedBitmap != source) {
+            source.recycle();
+        }
+        
+        return rotatedBitmap;
+    }
+}
     
     // Cleanup methods
     private void cleanupPreviewBitmap() {
@@ -367,6 +418,9 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     
     private void showCameraMode() {
         isInPreviewMode = false;
+
+        cleanupPreviewBitmap();
+        cleanupTempFile();
         
         // Show camera UI
         previewView.setVisibility(View.VISIBLE);
@@ -376,10 +430,10 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
         // Hide preview UI
         imagePreview.setVisibility(View.GONE);
         previewControls.setVisibility(View.GONE);
-        
-        // Clean up preview bitmap and temp file
-        cleanupPreviewBitmap();
-        cleanupTempFile();
+
+        if (allPermissionsGranted()) {
+            startCamera();
+        }
     }
     
     private void displayCapturedImage() {
@@ -396,6 +450,11 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     }
     
     private void handleRetake() {
+        // Cancel any running image loading task first
+        if (loadImageTask != null && !loadImageTask.isCancelled()) {
+            loadImageTask.cancel(true);
+            loadImageTask = null;
+        }
         showCameraMode();
     }
     
@@ -644,6 +703,11 @@ public void onConfigurationChanged(Configuration newConfig) {
         int currentCameraFacing = cameraFacing;
         boolean currentUsingUltraWide = usingUltraWideCamera;
         boolean currentPreviewMode = isInPreviewMode;
+
+        if (loadImageTask != null && !loadImageTask.isCancelled()) {
+            loadImageTask.cancel(true);
+            loadImageTask = null;
+        }
         
         // Manually apply the appropriate layout
         setContentView(getResources().getIdentifier("camerax_activity", "layout", getPackageName()));
@@ -652,12 +716,14 @@ public void onConfigurationChanged(Configuration newConfig) {
         initializeViews();
         
         // Restore camera state
-        if (isCameraRunning && !currentPreviewMode) {
+        if (currentPreviewMode) {
+            // If we were in preview mode, restore it
+            showPreviewMode();
+        } else if (isCameraRunning) {
+            // If camera was running, restart it
             cameraFacing = currentCameraFacing;
             usingUltraWideCamera = currentUsingUltraWide;
             startCamera();
-        } else if (currentPreviewMode) {
-            showPreviewMode();
         }
         
         // Update padding for system UI
