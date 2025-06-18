@@ -115,7 +115,7 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     private Bitmap currentPreviewBitmap;
     private boolean isInPreviewMode = false;
     private Uri capturedImageUri;
-    private File tempImageUri;
+    private File tempImageFile;
     private LoadImageTask loadImageTask;
 
     private ConstraintLayout bottomControls;
@@ -1087,7 +1087,7 @@ if (previewView != null) {
             camera != null && !scaleGestureDetector.isInProgress()) {
             
             // Only handle simple taps
-            if (event.getPointerCount() <= 1) {
+            if (event.getPointerCount() <= 1 && System.currentTimeMillis() - lastScaleEndTime > SCALE_COOLDOWN_PERIOD) {
                 // Get the tap coordinates
                 float x = event.getX();
                 float y = event.getY();
