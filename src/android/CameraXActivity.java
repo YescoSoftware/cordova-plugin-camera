@@ -1063,7 +1063,11 @@ if (hideExposureControlsRunnable == null) {
             @Override
             public void onScaleEnd(ScaleGestureDetector detector) {
                 // Hide zoom controls after a delay
+                lastScaleEndTime = System.currentTimeMillis();
                 handler.postDelayed(hideZoomControlsRunnable, 2000);
+                if (exposureControlContainer != null && exposureControlContainer.getVisibility() == View.VISIBLE) {
+                        hideExposureControls();
+                }
             }
         });
     }
@@ -1475,7 +1479,7 @@ private void startCamera() {
         // Clean up preview bitmap to free memory
         cleanupPreviewBitmap();
     }
-    }
+    
     
     @Override
     public void onBackPressed() {
@@ -1514,3 +1518,4 @@ private void startCamera() {
 
         System.gc();
     }
+}
