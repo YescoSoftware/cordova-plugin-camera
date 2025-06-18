@@ -1618,13 +1618,7 @@ protected void onDestroy() {
     if (exposureHideHandler != null) {
         exposureHideHandler.removeCallbacksAndMessages(null);
     }
-    
-    // Remove camera observers
-    if (zoomStateLiveData != null) {
-        zoomStateLiveData.removeObservers(this);
-        zoomStateLiveData = null;
-    }
-    
+     
     // Clean up camera
     if (camera != null) {
         camera = null;
