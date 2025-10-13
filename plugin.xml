@@ -87,7 +87,7 @@
             </intent>
         </config-file>
 
-        <preference name="ANDROIDX_CAMERAX_VERSION" default="1.3.+"/>
+        <preference name="ANDROIDX_CAMERAX_VERSION" default="1.4.+"/>
         <framework src="androidx.camera:camera-core:$ANDROIDX_CAMERAX_VERSION" />
         <framework src="androidx.camera:camera-camera2:$ANDROIDX_CAMERAX_VERSION" />
         <framework src="androidx.camera:camera-lifecycle:$ANDROIDX_CAMERAX_VERSION" />
@@ -127,7 +127,7 @@
             android:screenOrientation="fullSensor"/>
         </config-file>
 
-        <preference name="ANDROIDX_CORE_VERSION" default="1.10.+"/>
+        <preference name="ANDROIDX_CORE_VERSION" default="1.13.+"/>
         <framework src="androidx.core:core:$ANDROIDX_CORE_VERSION" />
 
         <js-module src="www/CameraPopoverHandle.js" name="CameraPopoverHandle">
