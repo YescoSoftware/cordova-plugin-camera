@@ -155,7 +155,7 @@ cameraExport.getPicture = function (successCallback, errorCallback, options) {
         args.push(flashMode); // Only push flashMode if it's relevant
     }
 
-    exec(successCallback, errorCallback, 'Camera', 'takePicture', args);
+    exec(successCallback, errorCallback, 'CameraFlash', 'takePicture', args);
     // XXX: commented out
     // return new CameraPopoverHandle();
 };
@@ -182,7 +182,7 @@ cameraExport.getPicture = function (successCallback, errorCallback, options) {
  * }
  */
 cameraExport.cleanup = function (successCallback, errorCallback) {
-    exec(successCallback, errorCallback, 'Camera', 'cleanup', []);
+    exec(successCallback, errorCallback, 'CameraFlash', 'cleanup', []);
 };
 
 module.exports = cameraExport;

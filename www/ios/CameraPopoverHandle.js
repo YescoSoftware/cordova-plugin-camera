@@ -59,7 +59,7 @@ const CameraPopoverHandle = function () {
      */
     this.setPosition = function (popoverOptions) {
         const args = [popoverOptions];
-        exec(null, null, 'Camera', 'repositionPopover', args);
+        exec(null, null, 'CameraFlash', 'repositionPopover', args);
     };
 };
 
