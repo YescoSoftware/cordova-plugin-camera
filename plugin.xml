@@ -152,7 +152,7 @@
          </config-file>
 
          <js-module src="www/ios/CameraPopoverHandle.js" name="CameraPopoverHandle">
-            <clobbers target="CameraPopoverHandle" />
+            <clobbers target="CameraPopoverHandleFlash" />
          </js-module>
 
          <header-file src="src/ios/UIImage+CropScaleOrientationFlash.h" />
