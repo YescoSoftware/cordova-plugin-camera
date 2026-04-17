@@ -1,5 +1,5 @@
 {
-  "name": "cordova-plugin-camera",
+  "name": "cordova-plugin-camera-flash",
   "version": "8.0.1-flash",
   "description": "Cordova Camera Plugin",
   "types": "./types/index.d.ts",
