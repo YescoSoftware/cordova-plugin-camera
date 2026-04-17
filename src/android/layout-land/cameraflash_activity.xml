@@ -84,7 +84,7 @@
                 android:id="@+id/flash_off_button"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/camearflash_ic_flash_off"
+                android:background="@drawable/cameraflash_ic_flash_off"
                 android:contentDescription="Flash Off" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
