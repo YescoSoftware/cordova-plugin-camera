@@ -1,10 +1,10 @@
 {
   "name": "cordova-plugin-camera",
-  "version": "8.0.1-dev",
+  "version": "8.0.1-flash",
   "description": "Cordova Camera Plugin",
   "types": "./types/index.d.ts",
   "cordova": {
-    "id": "cordova-plugin-camera",
+    "id": "cordova-plugin-camera-flash",
     "platforms": [
       "android",
       "ios",
