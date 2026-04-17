@@ -19,7 +19,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface UIImage (CropScaleOrientation)
+@interface UIImage (CropScaleOrientationFlash)
 
 - (UIImage*)imageByScalingAndCroppingForSize:(CGSize)targetSize;
 - (UIImage*)imageCorrectedForCaptureOrientation;

@@ -17,9 +17,9 @@
  under the License.
  */
 
-#import "CDVCamera.h"
-#import "CDVJpegHeaderWriter.h"
-#import "UIImage+CropScaleOrientation.h"
+#import "CDVCameraFlash.h"
+#import "CDVJpegHeaderWriterFlash.h"
+#import "UIImage+CropScaleOrientationFlash.h"
 #import <ImageIO/CGImageProperties.h>
 #import <AssetsLibrary/ALAssetRepresentation.h>
 #import <AssetsLibrary/AssetsLibrary.h>
@@ -96,13 +96,13 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 @end
 
 
-@interface CDVCamera ()
+@interface CDVCameraFlash ()
 
 @property (readwrite, assign) BOOL hasPendingOperation;
 
 @end
 
-@implementation CDVCamera
+@implementation CDVCameraFlash
 
 + (void)initialize
 {
@@ -131,7 +131,7 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 
 - (BOOL)usesGeolocation
 {
-    id useGeo = [self.commandDelegate.settings objectForKey:[@"CameraUsesGeolocation" lowercaseString]];
+    id useGeo = [self.commandDelegate.settings objectForKey:[@"CameraFlashUsesGeolocation" lowercaseString]];
     return [(NSNumber*)useGeo boolValue];
 }
 
@@ -144,7 +144,7 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 - (void)takePicture:(CDVInvokedUrlCommand*)command
 {
     self.hasPendingOperation = YES;
-    __weak CDVCamera* weakSelf = self;
+    __weak CDVCameraFlash* weakSelf = self;
 
     [self.commandDelegate runInBackground:^{
         CDVPictureOptions* pictureOptions = [CDVPictureOptions createFromTakePictureArguments:command];
@@ -213,7 +213,7 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 {
     // Perform UI operations on the main thread
     dispatch_async(dispatch_get_main_queue(), ^{
-        CDVCameraPicker* cameraPicker = [CDVCameraPicker createFromPictureOptions:pictureOptions];
+        CDVCameraFlashPicker* cameraPicker = [CDVCameraFlashPicker createFromPictureOptions:pictureOptions];
         
         // Only set flashMode if the sourceType is Camera
         if (pictureOptions.sourceType == UIImagePickerControllerSourceTypeCamera) {
@@ -695,8 +695,8 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info
 {
-    __weak CDVCameraPicker* cameraPicker = (CDVCameraPicker*)picker;
-    __weak CDVCamera* weakSelf = self;
+    __weak CDVCameraFlashPicker* cameraPicker = (CDVCameraFlashPicker*)picker;
+    __weak CDVCameraFlash* weakSelf = self;
 
     dispatch_block_t invoke = ^(void) {
         __block CDVPluginResult* result = nil;
@@ -739,8 +739,8 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 
 - (void)imagePickerControllerDidCancel:(UIImagePickerController*)picker
 {
-    __weak CDVCameraPicker* cameraPicker = (CDVCameraPicker*)picker;
-    __weak CDVCamera* weakSelf = self;
+    __weak CDVCameraFlashPicker* cameraPicker = (CDVCameraFlashPicker*)picker;
+    __weak CDVCameraFlash* weakSelf = self;
 
     dispatch_block_t invoke = ^ (void) {
         CDVPluginResult* result;
@@ -906,7 +906,7 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 
 @end
 
-@implementation CDVCameraPicker
+@implementation CDVCameraFlashPicker
 
 - (BOOL)prefersStatusBarHidden
 {
@@ -930,7 +930,7 @@ static NSString* MIME_JPEG    = @"image/jpeg";
 
 + (instancetype) createFromPictureOptions:(CDVPictureOptions*)pictureOptions;
 {
-    CDVCameraPicker* cameraPicker = [[CDVCameraPicker alloc] init];
+    CDVCameraFlashPicker* cameraPicker = [[CDVCameraFlashPicker alloc] init];
     cameraPicker.pictureOptions = pictureOptions;
     cameraPicker.sourceType = pictureOptions.sourceType;
     cameraPicker.allowsEditing = pictureOptions.allowsEditing;

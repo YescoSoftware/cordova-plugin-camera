@@ -17,8 +17,8 @@
  under the License.
  */
 
-#import "CDVJpegHeaderWriter.h"
-#include "CDVExif.h"
+#import "CDVJpegHeaderWriterFlash.h"
+#include "CDVExifFlash.h"
 
 /* macros for tag info shorthand:
    tagno        : tag number
@@ -38,7 +38,7 @@ const uint mIntelByteAlgin = 0x4949; // 'II', Intel byte align, lsb first or 'ba
 const uint mTiffLength = 0x2a; // after byte align bits, next to bits are 0x002a(MM) or 0x2a00(II), tiff version number
 
 
-@implementation CDVJpegHeaderWriter
+@implementation CDVJpegHeaderWriterFlash
 
 - (id) init {    
     self = [super init];
@@ -103,7 +103,7 @@ const uint mTiffLength = 0x2a; // after byte align bits, next to bits are 0x002a
 
 - (NSData*) spliceExifBlockIntoJpeg: (NSData*) jpegdata withExifBlock: (NSString*) exifstr {
     
-    CDVJpegHeaderWriter * exifWriter = [[CDVJpegHeaderWriter alloc] init];
+    CDVJpegHeaderWriterFlash * exifWriter = [[CDVJpegHeaderWriterFlash alloc] init];
     
     NSMutableData * exifdata = [NSMutableData dataWithCapacity: [exifstr length]/2];
     int idx;

@@ -64,7 +64,7 @@ typedef NSUInteger CDVMediaType;
 
 @end
 
-@interface CDVCameraPicker : UIImagePickerController
+@interface CDVCameraFlashPicker : UIImagePickerController
 
 @property (strong) CDVPictureOptions* pictureOptions;
 
@@ -80,13 +80,13 @@ typedef NSUInteger CDVMediaType;
 
 // ======================================================================= //
 
-@interface CDVCamera : CDVPlugin <UIImagePickerControllerDelegate,
+@interface CDVCameraFlash : CDVPlugin <UIImagePickerControllerDelegate,
                        UINavigationControllerDelegate,
                        UIPopoverControllerDelegate,
                        CLLocationManagerDelegate>
 {}
 
-@property (strong) CDVCameraPicker* pickerController;
+@property (strong) CDVCameraFlashPicker* pickerController;
 @property (strong) NSMutableDictionary *metadata;
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong) NSData* data;

@@ -17,9 +17,9 @@
  under the License.
  */
 
-#import "UIImage+CropScaleOrientation.h"
+#import "UIImage+CropScaleOrientationFlash.h"
 
-@implementation UIImage (CropScaleOrientation)
+@implementation UIImage (CropScaleOrientationFlash)
 
 - (UIImage*)imageByScalingAndCroppingForSize:(CGSize)targetSize
 {
