@@ -14,7 +14,7 @@
        specific language governing permissions and limitations
        under the License.
  */
-package org.apache.cordova.camera;
+package org.apache.cordova.cameraflash;
 
 import android.annotation.SuppressLint;
 import android.content.ContentUris;

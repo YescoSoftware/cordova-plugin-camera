@@ -1,4 +1,4 @@
-package org.apache.cordova.camera;
+package org.apache.cordova.cameraflash;
 
 import android.Manifest;
 import android.app.Activity;
@@ -90,7 +90,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.cordova.camera.ExifHelper;
+import org.apache.cordova.cameraflash.ExifHelper;
 
 @ExperimentalCamera2Interop
 public class CameraXActivity extends AppCompatActivity implements View.OnClickListener {
@@ -189,7 +189,7 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(getResources().getIdentifier("camerax_activity", "layout", getPackageName()));
+        setContentView(getResources().getIdentifier("cameraflash_activity", "layout", getPackageName()));
         
         initializeViews();
         
@@ -608,13 +608,13 @@ public class CameraXActivity extends AppCompatActivity implements View.OnClickLi
         // Update the button icon
         switch (mode) {
             case ImageCapture.FLASH_MODE_AUTO:
-                flashButton.setBackground(getDrawable(getResources().getIdentifier("ic_flash_auto", "drawable", getPackageName())));
+                flashButton.setBackground(getDrawable(getResources().getIdentifier("cameraflash_ic_flash_auto", "drawable", getPackageName())));
                 break;
             case ImageCapture.FLASH_MODE_ON:
-                flashButton.setBackground(getDrawable(getResources().getIdentifier("ic_flash_on", "drawable", getPackageName())));
+                flashButton.setBackground(getDrawable(getResources().getIdentifier("cameraflash_ic_flash_on", "drawable", getPackageName())));
                 break;
             case ImageCapture.FLASH_MODE_OFF:
-                flashButton.setBackground(getDrawable(getResources().getIdentifier("ic_flash_off", "drawable", getPackageName())));
+                flashButton.setBackground(getDrawable(getResources().getIdentifier("cameraflash_ic_flash_off", "drawable", getPackageName())));
                 break;
         }
     }
@@ -727,7 +727,7 @@ public void onConfigurationChanged(Configuration newConfig) {
         }
         
         // Manually apply the appropriate layout
-        setContentView(getResources().getIdentifier("camerax_activity", "layout", getPackageName()));
+        setContentView(getResources().getIdentifier("cameraflash_activity", "layout", getPackageName()));
         
         // Reinitialize all view references
         initializeViews();
@@ -1262,18 +1262,18 @@ if (previewView != null) {
     
     private void updateZoomButtonsState() {
         if (usingUltraWideCamera) {
-            wideAngleButton.setBackground(getDrawable(getResources().getIdentifier("circular_button_selected", "drawable", getPackageName())));
+            wideAngleButton.setBackground(getDrawable(getResources().getIdentifier("cameraflash_circular_button_selected", "drawable", getPackageName())));
             wideAngleButton.setTextColor(getResources().getColor(android.R.color.black));
-            normalZoomButton.setBackground(getDrawable(getResources().getIdentifier("circular_button", "drawable", getPackageName())));
+            normalZoomButton.setBackground(getDrawable(getResources().getIdentifier("cameraflash_circular_button", "drawable", getPackageName())));
             normalZoomButton.setTextColor(getResources().getColor(android.R.color.white));
             
             // Disable flash controls for ultra-wide camera
             flashButton.setAlpha(0.5f);
             flashButton.setEnabled(false);
         } else {
-            normalZoomButton.setBackground(getDrawable(getResources().getIdentifier("circular_button_selected", "drawable", getPackageName())));
+            normalZoomButton.setBackground(getDrawable(getResources().getIdentifier("cameraflash_circular_button_selected", "drawable", getPackageName())));
             normalZoomButton.setTextColor(getResources().getColor(android.R.color.black));
-            wideAngleButton.setBackground(getDrawable(getResources().getIdentifier("circular_button", "drawable", getPackageName())));
+            wideAngleButton.setBackground(getDrawable(getResources().getIdentifier("cameraflash_circular_button", "drawable", getPackageName())));
             wideAngleButton.setTextColor(getResources().getColor(android.R.color.white));
             
             // Re-enable flash controls for normal camera

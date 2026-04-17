@@ -43,7 +43,7 @@
             android:id="@+id/flash_button"
             android:layout_width="38dp"
             android:layout_height="38dp"
-            android:background="@drawable/ic_flash_auto"
+            android:background="@drawable/cameraflash_ic_flash_auto"
             android:contentDescription="Flash Mode"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -66,7 +66,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/ic_flash_auto"
+                android:background="@drawable/cameraflash_ic_flash_auto"
                 android:contentDescription="Auto Flash" />
 
             <ImageButton
@@ -74,14 +74,14 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/ic_flash_on"
+                android:background="@drawable/cameraflash_ic_flash_on"
                 android:contentDescription="Flash On" />
 
             <ImageButton
                 android:id="@+id/flash_off_button"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:background="@drawable/ic_flash_off"
+                android:background="@drawable/cameraflash_ic_flash_off"
                 android:contentDescription="Flash Off" />
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -109,7 +109,7 @@
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/circular_button"
+                android:background="@drawable/cameraflash_circular_button"
                 android:gravity="center"
                 android:text="0.5x"
                 android:textColor="@android:color/white"
@@ -120,7 +120,7 @@
                 android:id="@+id/normal_zoom_button"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
-                android:background="@drawable/circular_button_selected"
+                android:background="@drawable/cameraflash_circular_button_selected"
                 android:gravity="center"
                 android:text="1x"
                 android:textColor="@android:color/black"
@@ -133,7 +133,7 @@
             android:id="@+id/capture_button"
             android:layout_width="72dp"
             android:layout_height="72dp"
-            android:background="@drawable/capture_button_background"
+            android:background="@drawable/cameraflash_capture_button_background"
             android:contentDescription="Take Photo"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -143,7 +143,7 @@
             android:id="@+id/camera_flip_button"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:background="@drawable/ic_camera_flip"
+            android:background="@drawable/cameraflash_ic_camera_flip"
             android:contentDescription="Switch Camera"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -242,7 +242,7 @@
                 android:layout_height="wrap_content"
                 android:progressTint="#FFEB3B"
                 android:progressBackgroundTint="#FFEB3B"
-                android:thumb="@drawable/exposure_control" />
+                android:thumb="@drawable/cameraflash_exposure_control" />
         </LinearLayout>
     </FrameLayout>
 

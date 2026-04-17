@@ -330,7 +330,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         File photo = createCaptureFile(encodingType);
         this.imageUri = FileProvider.getUriForFile(
             cordova.getActivity(),
-            applicationId + ".cordova.plugin.camera.provider",
+            applicationId + ".cordova.plugin.cameraflash.provider",
             photo
         );
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
@@ -364,7 +364,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
            File photo = createCaptureFile(encodingType);
            this.imageUri = FileProvider.getUriForFile(
                cordova.getActivity(),
-               applicationId + ".cordova.plugin.camera.provider",
+               applicationId + ".cordova.plugin.cameraflash.provider",
                photo
            );
            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
@@ -432,7 +432,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             throw new IllegalArgumentException("Invalid Encoding Type: " + encodingType);
         }
 
-        File cacheDir = new File(getTempDirectoryPath(), "org.apache.cordova.camera");
+        File cacheDir = new File(getTempDirectoryPath(), "org.apache.cordova.cameraflash");
         cacheDir.mkdir();
 
         return new File(cacheDir, fileName);
@@ -708,7 +708,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         contentValues.put(MediaStore.MediaColumns.MIME_TYPE, getMimetypeForEncodingType());
         Uri galleryOutputUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
 
-        InputStream fileStream = org.apache.cordova.camera.FileHelper.getInputStreamFromUriString(imageUri.toString(), cordova);
+        InputStream fileStream = org.apache.cordova.cameraflash.FileHelper.getInputStreamFromUriString(imageUri.toString(), cordova);
         writeUncompressedImage(fileStream, galleryOutputUri);
     }
 
@@ -987,7 +987,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
               try {
                     if (this.allowEdit) {
                         Uri tmpFile = FileProvider.getUriForFile(cordova.getActivity(),
-                        applicationId + ".cordova.plugin.camera.provider",
+                        applicationId + ".cordova.plugin.cameraflash.provider",
                         createCaptureFile(this.encodingType));
                         performCrop(tmpFile, destType, intent);
                     } else {
