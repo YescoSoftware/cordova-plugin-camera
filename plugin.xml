@@ -25,9 +25,7 @@
     <name>CameraFlash</name>
     <description>Forked Cordova Camera Plugin with flash support</description>
     <license>Apache 2.0</license>
-    <keywords>cordova,camera</keywords>
-    <repo>https://github.com/apache/cordova-plugin-camera</repo>
-    <issue>https://github.com/apache/cordova-plugin-camera/issues</issue>
+    <keywords>cordova,camera,flash,fork</keywords>
 
     <engines>
         <engine name="cordova" version=">=9.0.0"/>
@@ -131,7 +129,7 @@
         <framework src="androidx.core:core:$ANDROIDX_CORE_VERSION" />
 
         <js-module src="www/CameraPopoverHandle.js" name="CameraPopoverHandle">
-            <clobbers target="CameraPopoverHandle" />
+            <clobbers target="CameraPopoverHandleFlash" />
           </js-module>
       </platform>
 
@@ -141,7 +139,7 @@
              <feature name="CameraFlash">
                  <param name="ios-package" value="CDVCameraFlash" />
              </feature>
-             <preference name="CameraUsesGeolocation" value="false" />
+             <preference name="CameraFlashUsesGeolocation" value="false" />
          </config-file>
         <config-file target="*-Info.plist" parent="NSCameraUsageDescription">
              <string>This app needs camera access to take photos</string>
@@ -157,13 +155,13 @@
             <clobbers target="CameraPopoverHandle" />
          </js-module>
 
-         <header-file src="src/ios/UIImage+CropScaleOrientation.h" />
-         <source-file src="src/ios/UIImage+CropScaleOrientation.m" />
-         <header-file src="src/ios/CDVCamera.h" />
-         <source-file src="src/ios/CDVCamera.m" />
-         <header-file src="src/ios/CDVJpegHeaderWriter.h" />
-         <source-file src="src/ios/CDVJpegHeaderWriter.m" />
-         <header-file src="src/ios/CDVExif.h" />
+         <header-file src="src/ios/UIImage+CropScaleOrientationFlash.h" />
+         <source-file src="src/ios/UIImage+CropScaleOrientationFlash.m" />
+         <header-file src="src/ios/CDVCameraFlash.h" />
+         <source-file src="src/ios/CDVCameraFlash.m" />
+         <header-file src="src/ios/CDVJpegHeaderWriterFlash.h" />
+         <source-file src="src/ios/CDVJpegHeaderWriterFlash.m" />
+         <header-file src="src/ios/CDVExifFlash.h" />
          <framework src="ImageIO.framework" weak="true" />
          <framework src="CoreLocation.framework" />
          <framework src="CoreGraphics.framework" />
