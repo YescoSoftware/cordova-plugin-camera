@@ -20,10 +20,10 @@
 
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    id="cordova-plugin-camera"
-    version="8.0.1-dev">
-    <name>Camera</name>
-    <description>Cordova Camera Plugin</description>
+    id="cordova-plugin-camera-flash"
+    version="8.0.1-flash">
+    <name>CameraFlash</name>
+    <description>Forked Cordova Camera Plugin with flash support</description>
     <license>Apache 2.0</license>
     <keywords>cordova,camera</keywords>
     <repo>https://github.com/apache/cordova-plugin-camera</repo>
@@ -36,22 +36,22 @@
     </engines>
 
     <js-module src="www/CameraConstants.js" name="Camera">
-        <clobbers target="Camera" />
+        <clobbers target="CameraFlash" />
     </js-module>
 
     <js-module src="www/CameraPopoverOptions.js" name="CameraPopoverOptions">
-        <clobbers target="CameraPopoverOptions" />
+        <clobbers target="CameraPopoverOptionsFlash" />
     </js-module>
 
     <js-module src="www/Camera.js" name="camera">
-        <clobbers target="navigator.camera" />
+        <clobbers target="navigator.cameraFlash" />
     </js-module>
 
     <!-- android -->
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
-            <feature name="Camera">
-                <param name="android-package" value="org.apache.cordova.camera.CameraLauncher"/>
+            <feature name="CameraFlash">
+                <param name="android-package" value="org.apache.cordova.cameraflash.CameraLauncher"/>
             </feature>
         </config-file>
         <config-file target="AndroidManifest.xml" parent="/*">
@@ -61,13 +61,13 @@
         </config-file>
         <config-file target="AndroidManifest.xml" parent="application">
           <provider
-              android:name="org.apache.cordova.camera.FileProvider"
-              android:authorities="${applicationId}.cordova.plugin.camera.provider"
+              android:name="org.apache.cordova.cameraflash.FileProvider"
+              android:authorities="${applicationId}.cordova.plugin.cameraflash.provider"
               android:exported="false"
               android:grantUriPermissions="true" >
               <meta-data
                   android:name="android.support.FILE_PROVIDER_PATHS"
-                  android:resource="@xml/camera_provider_paths"/>
+                  android:resource="@xml/cameraflash_provider_paths"/>
           </provider>
         </config-file>
 
@@ -97,32 +97,32 @@
         <framework src ="androidx.constraintlayout:constraintlayout:2.1.4"/>
         <framework src="com.google.android.material:material:1.9.0"/>
       
-        <source-file src="src/android/CameraLauncher.java" target-dir="src/org/apache/cordova/camera" />
-        <source-file src="src/android/FileHelper.java" target-dir="src/org/apache/cordova/camera" />
-        <source-file src="src/android/ExifHelper.java" target-dir="src/org/apache/cordova/camera" />
-        <source-file src="src/android/FileProvider.java" target-dir="src/org/apache/cordova/camera" />
-        <source-file src="src/android/GalleryPathVO.java" target-dir="src/org/apache/cordova/camera" />
-        <source-file src="src/android/CameraXActivity.java" target-dir="src/org/apache/cordova/camera" />
-        <source-file src="src/android/xml/camera_provider_paths.xml" target-dir="res/xml" />
-        <source-file src="src/android/layout/camerax_activity.xml" target-dir="res/layout" />
-        <source-file src="src/android/layout-land/camerax_activity.xml" target-dir="res/layout-land" />
-        <source-file src="src/android/drawable/exposure_control.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/ic_flash_auto.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/ic_flash_on.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/ic_flash_off.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/ic_camera_flip.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/capture_button_background.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/zoom_progress_drawable.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/zoom_thumb.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/circular_button.xml" target-dir="res/drawable" />
-        <source-file src="src/android/drawable/circular_button_selected.xml" target-dir="res/drawable" />
-        <source-file src="src/android/values/camerax_styles.xml" target-dir="res/values" />
+        <source-file src="src/android/CameraLauncher.java" target-dir="src/org/apache/cordova/cameraflash" />
+        <source-file src="src/android/FileHelper.java" target-dir="src/org/apache/cordova/cameraflash" />
+        <source-file src="src/android/ExifHelper.java" target-dir="src/org/apache/cordova/cameraflash" />
+        <source-file src="src/android/FileProvider.java" target-dir="src/org/apache/cordova/cameraflash" />
+        <source-file src="src/android/GalleryPathVO.java" target-dir="src/org/apache/cordova/cameraflash" />
+        <source-file src="src/android/CameraXActivity.java" target-dir="src/org/apache/cordova/cameraflash" />
+        <source-file src="src/android/xml/cameraflash_provider_paths.xml" target-dir="res/xml" />
+        <source-file src="src/android/layout/cameraflash_activity.xml" target-dir="res/layout" />
+        <source-file src="src/android/layout-land/cameraflash_activity.xml" target-dir="res/layout-land" />
+        <source-file src="src/android/drawable/cameraflash_exposure_control.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_ic_flash_auto.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_ic_flash_on.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_ic_flash_off.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_ic_camera_flip.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_capture_button_background.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_zoom_progress_drawable.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_zoom_thumb.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_circular_button.xml" target-dir="res/drawable" />
+        <source-file src="src/android/drawable/cameraflash_circular_button_selected.xml" target-dir="res/drawable" />
+        <source-file src="src/android/values/cameraflash_styles.xml" target-dir="res/values" />
 
         <config-file target="AndroidManifest.xml" parent="application">
           <activity 
-            android:name="org.apache.cordova.camera.CameraXActivity"
+            android:name="org.apache.cordova.cameraflash.CameraXActivity"
             android:exported="false"
-            android:theme="@style/CameraTheme"
+            android:theme="@style/CameraFlashTheme"
             android:configChanges="orientation|keyboardHidden|screenSize|screenLayout"
             android:screenOrientation="fullSensor"/>
         </config-file>
@@ -138,8 +138,8 @@
      <!-- ios -->
      <platform name="ios">
          <config-file target="config.xml" parent="/*">
-             <feature name="Camera">
-                 <param name="ios-package" value="CDVCamera" />
+             <feature name="CameraFlash">
+                 <param name="ios-package" value="CDVCameraFlash" />
              </feature>
              <preference name="CameraUsesGeolocation" value="false" />
          </config-file>
@@ -177,8 +177,8 @@
     <!-- browser -->
     <platform name="browser">
         <config-file target="config.xml" parent="/*">
-            <feature name="Camera">
-                <param name="browser-package" value="Camera" />
+            <feature name="CameraFlash">
+                <param name="browser-package" value="CameraFlash" />
             </feature>
         </config-file>
 
